@@ -1,6 +1,6 @@
 import { Env } from '../../utils';
 import { decryptToken } from '../../crypto';
-import { ensureValidToken } from '../oauth/refresh-logic';
+import { ensureValidToken } from '../oauth/_refresh-logic';
 // @ts-ignore
 import { TwitterApi } from 'twitter-api-v2';
 // @ts-ignore
