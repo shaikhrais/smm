@@ -1,5 +1,6 @@
 import { Env } from '../../utils';
 import { decryptToken } from '../../crypto';
+import { ensureValidToken } from '../oauth/refresh-logic';
 // @ts-ignore
 import { TwitterApi } from 'twitter-api-v2';
 // @ts-ignore
@@ -23,7 +24,7 @@ export async function dispatchPost(
 
     // 1. Fetch all connected social accounts for this brand
     const { results: accounts } = await env.DB.prepare(
-        'SELECT sa.*, ot.access_token_encrypted, ot.refresh_token_encrypted FROM social_accounts sa ' +
+        'SELECT sa.*, ot.access_token_encrypted, ot.refresh_token_encrypted, ot.expires_at FROM social_accounts sa ' +
         'JOIN oauth_tokens ot ON sa.id = ot.social_account_id ' +
         'WHERE sa.brand_id = ? AND sa.status = "connected"'
     ).bind(brandId).all();
@@ -42,25 +43,26 @@ export async function dispatchPost(
     // 3. Post to each platform
     for (const account of targetAccounts) {
         try {
-            const decryptedToken = await decryptToken(account.access_token_encrypted, env.TOKEN_ENCRYPTION_KEY);
+            // Ensure token is valid (refresh if needed)
+            const accessToken = await ensureValidToken(env, account);
 
             let result: PostResult;
             switch (account.platform) {
                 case 'twitter':
-                    result = await postToTwitter(decryptedToken, content, mediaUrls);
+                    result = await postToTwitter(accessToken, content, mediaUrls);
                     break;
                 case 'facebook':
-                    result = await postToFacebook(decryptedToken, content, mediaUrls);
+                    result = await postToFacebook(accessToken, content, mediaUrls);
                     break;
                 case 'linkedin':
-                    result = await postToLinkedIn(decryptedToken, content, mediaUrls);
+                    result = await postToLinkedIn(accessToken, content, mediaUrls);
                     break;
                 default:
                     result = { platform: account.platform, success: false, error: 'Platform not supported yet.' };
             }
             results.push(result);
         } catch (e: any) {
-            results.push({ platform: account.platform, success: false, error: `Auth Error: ${e.message}` });
+            results.push({ platform: account.platform, success: false, error: `Auth/Refresh Error: ${e.message}` });
         }
     }
 
