@@ -78,7 +78,7 @@ export default function SocialMediaDashboard() {
 
         // Redirect to real OAuth authorize endpoint on the backend
         // Use the same BASE_URL used by the rest of the app
-        window.location.href = `${BASE_URL}/oauth/${platform}/authorize?brand_id=${selectedBrandId}`;
+        window.location.href = `${BASE_URL}/api/oauth/${platform}/authorize?brand_id=${selectedBrandId}`;
     };
 
     const filteredAccounts = accounts.filter(a => a.brandId === selectedBrandId);
