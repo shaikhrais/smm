@@ -1,48 +1,10 @@
 import { jsonResponse, errorResponse, Env } from '../../../utils';
 import { encryptToken } from '../../../crypto';
-// @ts-ignore
-import { FacebookAdsApi } from 'facebook-nodejs-business-sdk';
-// @ts-ignore
-import FB from 'fb';
 
 const FB_CLIENT_ID = 'YOUR_FB_CLIENT_ID';
 const REDIRECT_URI = 'https://social-media-manager-api.pages.dev/api/oauth/facebook/callback';
 
-export const onRequest: PagesFunction<Env> = async (context) => {
-    const { request, env } = context;
-    const url = new URL(request.url);
-    const pathParts = url.pathname.split('/');
-    const action = pathParts[pathParts.length - 1]; // 'authorize' or 'callback'
-
-    if (action === 'authorize') {
-        return handleAuthorize(context);
-    } else if (action === 'callback') {
-        return handleCallback(context);
-    }
-
-    return errorResponse('Invalid OAuth action', 404);
-};
-
-async function handleAuthorize({ request, env }: { request: Request, env: Env }) {
-    const url = new URL(request.url);
-    const brandId = url.searchParams.get('brand_id');
-
-    if (!brandId) {
-        return errorResponse('brand_id is required', 400);
-    }
-
-    const state = btoa(JSON.stringify({ brandId }));
-
-    const fbAuthUrl = `https://www.facebook.com/v18.0/dialog/oauth?` +
-        `client_id=${env.FACEBOOK_CLIENT_ID || FB_CLIENT_ID}` +
-        `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}` +
-        `&state=${state}` +
-        `&scope=pages_manage_posts,pages_read_engagement,instagram_basic,instagram_content_publish,pages_show_list,business_management`;
-
-    return Response.redirect(fbAuthUrl, 302);
-}
-
-async function handleCallback({ request, env }: { request: Request, env: Env }) {
+export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     const url = new URL(request.url);
     const code = url.searchParams.get('code');
     const stateStr = url.searchParams.get('state');
@@ -96,4 +58,4 @@ async function handleCallback({ request, env }: { request: Request, env: Env }) 
     } catch (e: any) {
         return Response.redirect(`https://social-media-manager-ui.pages.dev/social-media?error=${encodeURIComponent(e.message)}`, 302);
     }
-}
+};
