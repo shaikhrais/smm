@@ -67,8 +67,8 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
         const encryptedToken = await encryptToken(finalToken, env.TOKEN_ENCRYPTION_KEY);
 
         await env.DB.prepare(
-            'INSERT INTO social_accounts (id, brand_id, platform, platform_account_id, username, status) VALUES (?, ?, ?, ?, ?, ?)'
-        ).bind(socialAccountId, brandId, 'instagram', igAccountId, igName || 'Instagram Account', 'connected').run();
+            'INSERT INTO social_accounts (id, brand_id, platform, username, handle, status) VALUES (?, ?, ?, ?, ?, ?)'
+        ).bind(socialAccountId, brandId, 'instagram', igName || 'Instagram Account', `@${igName}`, 'connected').run();
 
         await env.DB.prepare(
             'INSERT INTO oauth_tokens (id, social_account_id, platform, access_token_encrypted, expires_at) VALUES (?, ?, ?, ?, ?)'
