@@ -1,5 +1,5 @@
-import { jsonResponse, errorResponse, Env } from '../../utils';
-import { encryptToken } from '../../crypto';
+import { jsonResponse, errorResponse, Env } from '../../../utils';
+import { encryptToken } from '../../../crypto';
 // @ts-ignore - linkedin-api-client might not have types
 import { LinkedIn } from 'linkedin-api-client';
 
@@ -88,6 +88,6 @@ async function handleCallback({ request, env }: { request: Request, env: Env }) 
 
         return Response.redirect('https://social-media-manager-ui.pages.dev/social-media?success=true', 302);
     } catch (e: any) {
-        return errorResponse(`LinkedIn OAuth Error: ${e.message}`);
+        return Response.redirect(`https://social-media-manager-ui.pages.dev/social-media?error=${encodeURIComponent(e.message)}`, 302);
     }
 }

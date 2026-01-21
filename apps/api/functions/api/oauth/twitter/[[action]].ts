@@ -1,5 +1,6 @@
-import { jsonResponse, errorResponse, Env } from '../../utils';
-import { encryptToken } from '../../crypto';
+import { jsonResponse, errorResponse, Env } from '../../../utils';
+import { encryptToken } from '../../../crypto';
+// @ts-ignore
 import { TwitterApi } from 'twitter-api-v2';
 
 const TWITTER_CLIENT_ID = 'YOUR_TWITTER_ID';
@@ -94,6 +95,6 @@ async function handleCallback({ request, env }: { request: Request, env: Env }) 
 
         return Response.redirect('https://social-media-manager-ui.pages.dev/social-media?success=true', 302);
     } catch (e: any) {
-        return errorResponse(`Twitter OAuth Error: ${e.message}`);
+        return Response.redirect(`https://social-media-manager-ui.pages.dev/social-media?error=${encodeURIComponent(e.message)}`, 302);
     }
 }

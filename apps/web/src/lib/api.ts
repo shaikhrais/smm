@@ -4,7 +4,7 @@ export interface ApiResponse<T> {
     success: boolean;
 }
 
-const BASE_URL = import.meta.env.VITE_API_URL || 'https://social-media-manager-api.pages.dev/api';
+export const BASE_URL = import.meta.env.VITE_API_URL || 'https://social-media-manager-api.pages.dev/api';
 
 function getAuthToken(): string | null {
     try {

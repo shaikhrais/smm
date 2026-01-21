@@ -1,20 +1,30 @@
 import { jsonResponse, errorResponse, Env } from '../../utils';
+import { dispatchPost } from './dispatcher';
 
-export const onRequestGet: PagesFunction<Env> = async ({ env }) => {
+export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     try {
-        const { results } = await env.DB.prepare('SELECT * FROM posts ORDER BY created_at DESC').all();
+        const url = new URL(request.url);
+        const brandId = url.searchParams.get('brand_id');
+
+        let query = 'SELECT * FROM posts';
+        let stmt;
+
+        if (brandId) {
+            query += ' WHERE brand_id = ?';
+            query += ' ORDER BY created_at DESC';
+            stmt = env.DB.prepare(query).bind(brandId);
+        } else {
+            query += ' ORDER BY created_at DESC';
+            stmt = env.DB.prepare(query);
+        }
+
+        const { results } = await stmt.all();
         const parsedPosts = results.map(post => ({
             ...post,
             mediaUrls: post.media_urls ? JSON.parse(post.media_urls as string) : [],
             platforms: post.platforms ? JSON.parse(post.platforms as string) : [],
-            // CamelCase conversion if needed, but keeping simple for now or assuming frontend maps it? 
-            // Frontend expects: brandId, scheduledDate. DB has: brand_id, scheduled_date
-            // Let's map it explicitly to match frontend expectations.
             brandId: post.brand_id,
-            scheduledDate: post.scheduled_date,
-            media_urls: undefined, // remove raw keys
-            brand_id: undefined,
-            scheduled_date: undefined
+            scheduledDate: post.scheduled_date
         }));
         return jsonResponse(parsedPosts);
     } catch (e) {
@@ -22,11 +32,11 @@ export const onRequestGet: PagesFunction<Env> = async ({ env }) => {
     }
 };
 
-export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
+export const onRequestPost: PagesFunction<Env> = async (context) => {
+    const { request, env } = context;
     try {
         const body = await request.json() as any;
         const id = crypto.randomUUID();
-        // Accept both snake_case and camelCase
         const brand_id = body.brand_id || body.brandId;
         const { content, mediaUrls, scheduledDate, status, platforms } = body;
 
@@ -34,11 +44,18 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
             return errorResponse('brand_id is required', 400);
         }
 
+        // 1. Save to Database
         await env.DB.prepare('INSERT INTO posts (id, brand_id, content, media_urls, scheduled_date, status, platforms) VALUES (?, ?, ?, ?, ?, ?, ?)')
             .bind(id, brand_id, content, JSON.stringify(mediaUrls || []), scheduledDate || null, status || 'draft', JSON.stringify(platforms || []))
             .run();
 
-        const newPost = { id, brand_id, content, mediaUrls, scheduledDate, status, platforms };
+        // 2. If status is 'published', dispatch immediately
+        let dispatchResults: any[] = [];
+        if (status === 'published' || !scheduledDate) {
+            dispatchResults = await dispatchPost(env, brand_id, content, platforms || [], mediaUrls || []);
+        }
+
+        const newPost = { id, brand_id, content, mediaUrls, scheduledDate, status, platforms, dispatchResults };
         return jsonResponse(newPost, 201);
     } catch (e) {
         return errorResponse('Failed to create post: ' + (e as Error).message);

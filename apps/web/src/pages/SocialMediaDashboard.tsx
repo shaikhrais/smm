@@ -13,6 +13,7 @@ import {
     RefreshCw,
     Share2
 } from 'lucide-react';
+import { BASE_URL } from '../lib/api';
 import { useSocialStore, type Platform } from '../store/socialStore';
 import { useBrandStore } from '../store/brandStore';
 import { useBusinessStore } from '../store/businessStore';
@@ -76,8 +77,8 @@ export default function SocialMediaDashboard() {
         setIsConnecting(platform);
 
         // Redirect to real OAuth authorize endpoint on the backend
-        const baseUrl = 'https://social-media-manager-api.pages.dev';
-        window.location.href = `${baseUrl}/api/oauth/${platform}/authorize?brand_id=${selectedBrandId}`;
+        // Use the same BASE_URL used by the rest of the app
+        window.location.href = `${BASE_URL}/oauth/${platform}/authorize?brand_id=${selectedBrandId}`;
     };
 
     const filteredAccounts = accounts.filter(a => a.brandId === selectedBrandId);
