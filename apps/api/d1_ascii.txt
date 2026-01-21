@@ -1,0 +1,47 @@
+[
+  {
+    "uuid": "36e906ef-2231-4b16-806c-a28aaafc5102",
+    "name": "smm",
+    "created_at": "2026-01-21T03:59:33.913Z",
+    "version": "production",
+    "num_tables": 0,
+    "file_size": 45056,
+    "jurisdiction": null
+  },
+  {
+    "uuid": "07477313-75b5-42bf-b319-0c3832275920",
+    "name": "pick-wheel-db",
+    "created_at": "2026-01-04T00:59:13.314Z",
+    "version": "production",
+    "num_tables": 0,
+    "file_size": 73728,
+    "jurisdiction": null
+  },
+  {
+    "uuid": "ae75c4cf-b25b-49c2-80d5-bba9d7376b0a",
+    "name": "service-hub-db",
+    "created_at": "2025-12-13T21:12:02.112Z",
+    "version": "production",
+    "num_tables": 0,
+    "file_size": 212992,
+    "jurisdiction": null
+  },
+  {
+    "uuid": "4ab234e3-7ff4-4e86-b070-df00b0c9a36b",
+    "name": "voipapp-db",
+    "created_at": "2025-12-09T14:36:27.945Z",
+    "version": "production",
+    "num_tables": 0,
+    "file_size": 217088,
+    "jurisdiction": null
+  },
+  {
+    "uuid": "5b0cc3d8-fbdc-4ee4-a1e7-52ea9782d3dd",
+    "name": "audio2transcript-db",
+    "created_at": "2025-11-21T07:41:31.911Z",
+    "version": "production",
+    "num_tables": 0,
+    "file_size": 77824,
+    "jurisdiction": null
+  }
+]
